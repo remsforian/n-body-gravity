@@ -3,15 +3,13 @@ Teddy Masters Copyright 2023
 All non commercial use permitted  
 A numerical simulation of the n body problem using gravitational forces
 This project was inspired by the novel "the three body problem" by Cixin Liu
-
-Things I still want to do:
-parallelization
 */
 //dependencies
 #include<stdio.h>
 #include<cmath>
 #include<iostream>
 #include<cstdlib>
+#include<omp.h>
 //macros
 #define dt 0.001
 #define dtao 0.05 
@@ -32,6 +30,7 @@ parallelization
 #define FORN for(int n=0;n<N;n++)
 #define FORP for(int p=0;p<N;p++)
 
+
 //define functions 
 void derivs(long double[N][I][D], long double[N][I][D]);
 void dy(long double[N][I][D], long double[N][I][D],long double[N][I][D]);
@@ -48,7 +47,7 @@ int main(){
 	//create time variables
 	double t;
 	double tau;
-	double tf = 15; //final time
+	double tf = 100; //final time
 	FORN{
 		FORD{
 			int seed = (RANDSEED)*(n+1)*(d+1);
@@ -58,7 +57,7 @@ int main(){
 	}
 	//file setup
 	FILE* fptr;
-	fptr = fopen("body_cords.dat","w+");
+	fptr = fopen("body_cords_par.dat","w+");
 	//beginning output
 	std::cout << "Program beginning. Final t: " << tf << "\n"; //prints output for user 
 	for(t = 0;t<tf;t+=dt){
@@ -124,6 +123,8 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 	long double df2[N][I][D];
 	long double df3[N][I][D];
 	long double df4[N][I][D];
+	#pragma omp parallel
+	{
 	derivs(y,dydt); //first step calc
 	FORN{
 		FORI{
@@ -132,6 +133,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	derivs(f1,df1); //second step calc
 	FORN{
 		FORI{
@@ -140,6 +144,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	derivs(f2,df2); //third step calc
 	FORN{
 		FORI{
@@ -148,6 +155,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	derivs(f3,df3); //fourth step calc
 	FORN{
 		FORI{
@@ -156,6 +166,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	derivs(f4,df4); //final calc
 	FORN{
 		FORI{
@@ -165,12 +178,15 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
+	}
 }
 void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function where the physics lives 
 	long double r[N][D][D];//vector between bodies
 	long double sqmag[N][N];//square magnitude of r
 	long double mag[N][N]; //magnitude of r
-	long double rhat[N][N][D];//unit vectors of r	
+	long double rhat[N][N][D];//unit vectors of r
+	#pragma omp parallel
+	{
 	FORN{
 		FORI{
 			FORD{
@@ -178,16 +194,25 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORP{
 			sqmag[n][p] = 0; //clears sqmag variable
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORD{
 			dydt[n][0][d] = y[n][1][d]; //change in position from velocity
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORP{
 			FORD{
@@ -195,6 +220,9 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORP{
 			FORD{
@@ -202,11 +230,17 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORP{
 			mag[n][p] = sqrt(sqmag[n][p]); //calculates the magnitude of the r vector
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORP{
 			FORD{
@@ -215,6 +249,9 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	}
+	#pragma omp parallel
+	{
 	FORN{
 		FORD{
 			FORP{
@@ -222,5 +259,6 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 				dydt[n][1][d] += ((-G*M*M)/(POW(mag[n][p]))*(rhat[n][p][d])); //adds in new accelerations
 			}
 		}
+	}
 	}
 }
