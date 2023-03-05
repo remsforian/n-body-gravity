@@ -1,0 +1,6 @@
+#ignore already simulated data
+*.dat
+
+#ignore already compiled machene code
+
+sim
