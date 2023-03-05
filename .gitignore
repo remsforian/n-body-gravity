@@ -3,4 +3,4 @@
 
 #ignore already compiled machene code
 
-sim
+./sim
