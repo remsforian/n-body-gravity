@@ -3,9 +3,6 @@ Teddy Masters Copyright 2023
 All non commercial use permitted  
 A numerical simulation of the n body problem using gravitational forces
 This project was inspired by the novel "the three body problem" by Cixin Liu
-
-Things I still want to do:
-parallelization
 */
 //dependencies
 #include<stdio.h>
@@ -13,10 +10,10 @@ parallelization
 #include<iostream>
 #include<cstdlib>
 //macros
-#define dt 0.001
+#define dt 0.0001
 #define dtao 0.05 
-#define vinit 5.
-#define rinit 10.
+#define vinit 50
+#define rinit 100
 //N: number of bodies, I: number of diffeqs D: number of dimensions
 #define N 4
 #define I 2
@@ -48,7 +45,7 @@ int main(){
 	//create time variables
 	double t;
 	double tau;
-	double tf = 15; //final time
+	double tf = 200; //final time
 	FORN{
 		FORD{
 			int seed = (RANDSEED)*(n+1)*(d+1);
@@ -161,7 +158,6 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 		FORI{
 			FORD{
 				deltay[n][i][d] = (1./6.) * (df1[n][i][d] + 2 * df2[n][i][d] + 2 * df3[n][i][d] + df4[n][i][d]) * dt; //weighted avrage
-				//std::cout << "deltay " << n << i << d << deltay[n][i][d] << "\n";
 			}
 		}
 	}
@@ -170,7 +166,8 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 	long double r[N][D][D];//vector between bodies
 	long double sqmag[N][N];//square magnitude of r
 	long double mag[N][N]; //magnitude of r
-	long double rhat[N][N][D];//unit vectors of r	
+	long double rhat[N][N][D];//unit vectors of r
+	long double fmag[N][N]; //magnitude of gravitational force between two given bodies	
 	FORN{
 		FORI{
 			FORD{
@@ -210,16 +207,26 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 	FORN{
 		FORP{
 			FORD{
-				if(n==p){continue;} //doesn't let the program divide by zero (which wouldn't be ideal)
-				rhat[n][p][d] = r[n][p][d] / mag[n][p]; //creates the appropriate unit vector
+				if(p!=n){
+					rhat[n][p][d] = r[n][p][d]/mag[n][p];
+				}
+			}
+		}
+	}
+	FORN{
+		FORP{
+			if(p!=n){
+				//fmag[n][p] = (-G*M*M)/POW(mag[n][p]); //acceleration
+				fmag[n][p] = (POW(mag[n][p]))/(-G*M*M); //wrong acceleration 
 			}
 		}
 	}
 	FORN{
 		FORD{
 			FORP{
-				if(p==n){continue;} //this is a safety guard for dividing by zero
-				dydt[n][1][d] += ((-G*M*M)/(POW(mag[n][p]))*(rhat[n][p][d])); //adds in new accelerations
+				if(p!=n){
+					dydt[n][1][d] = (fmag[n][p]/M)*rhat[n][p][d]; //change velocity from force data
+				}	
 			}
 		}
 	}
