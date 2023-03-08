@@ -11,10 +11,10 @@ This project was inspired by the novel "the three body problem" by Cixin Liu
 #include<cstdlib>
 #include<omp.h>
 //macros
-#define dt 0.0001
+#define dt 0.001
 #define dtao 0.05 
-#define vinit 50
-#define rinit 100
+#define vinit 5
+#define rinit 10
 #define nthreads 8
 //N: number of bodies, I: number of diffeqs D: number of dimensions
 #define N 3
@@ -47,7 +47,7 @@ int main(){
 	//create time variables
 	double t;
 	double tau;
-	double tf = 100; //final time
+	double tf = 500; //final time
 	FORN{
 		FORD{
 			int seed = (RANDSEED)*(n+1)*(d+1);
@@ -246,7 +246,7 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 	FORN{
 		FORP{
 			if(p!=n){
-				fmag[n][p] = (-G*M*M)/POW(mag[n][p]); //acceleration
+				fmag[n][p] = 100*((-G*M*M)/POW(mag[n][p])); //acceleration
 			}
 		}
 	}
