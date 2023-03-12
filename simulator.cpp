@@ -9,11 +9,13 @@ This project was inspired by the novel "the three body problem" by Cixin Liu
 #include<cmath>
 #include<iostream>
 #include<cstdlib>
+#include<omp.h>
 //macros
-#define dt 0.0001
-#define dtao 0.05 
-#define vinit 50
-#define rinit 100
+#define dt 0.001
+#define dtao 0.1 
+#define vinit 0
+#define rinit 10
+#define nthreads 8
 //N: number of bodies, I: number of diffeqs D: number of dimensions
 #define N 3
 #define I 2
@@ -41,11 +43,10 @@ int main(){
 	long double dydt[N][I][D];
 	long double deltay[N][I][D];
 	//random stuff
-	int RANDSEED = 19258;
+	int RANDSEED = 25258;
 	//create time variables
-	double t;
-	double tau;
-	double tf = 100; //final time
+	double t,tau,tstart,trun;
+	double tf = 500; //final time
 	FORN{
 		FORD{
 			int seed = (RANDSEED)*(n+1)*(d+1);
@@ -57,7 +58,8 @@ int main(){
 	FILE* fptr;
 	fptr = fopen("body_cords.dat","w+");
 	//beginning output
-	std::cout << "Program beginning. Final t: " << tf << "\n"; //prints output for user 
+	std::cout << "Program beginning. Final t: " << tf << "\n"; //prints output for user
+	tstart = omp_get_wtime(); //for recording program runtime 
 	for(t = 0;t<tf;t+=dt){
 		//update the values
 		dy(y,dydt,deltay);
@@ -71,7 +73,7 @@ int main(){
 		if(t>=tau){//prints to file
 			tau += dtao;
 			fprintf(fptr,"%lf ",t); //prints time
-			if(CENTER == 1){recenter(y);} //re-centers if desired setting is there
+			if(CENTER == 1)recenter(y); //re-centers if desired setting is there
 			FORN{
 				FORD{
 					fprintf(fptr,"%Lf ",y[n][0][d]); //prints positions of all bodies
@@ -81,6 +83,8 @@ int main(){
 			std::cout << "Current Program Time:" << t << "\n"; //prints current time to user
 		}
 	}
+	trun = omp_get_wtime() - tstart; //find the time the program ran for
+	std::cout << "Program completed. The program took " << trun << " seconds. \n";
 }
 long double POW(long double x){
 	return(x*x);
@@ -93,10 +97,6 @@ long double randfunc(long double lbound, long double ubound,int seed){
 void recenter(long double y[N][I][D]){
 	long double sum[D];
 	long double avg[D];
-	FORD{
-		sum[d] = 0;
-		avg[d] = 0;
-	}
 	FORN{
 		FORD{
 			sum[d] += y[n][0][d]; //finds the sum in each direction
@@ -121,7 +121,12 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 	long double df2[N][I][D];
 	long double df3[N][I][D];
 	long double df4[N][I][D];
-	derivs(y,dydt); //first step calc
+	omp_set_num_threads(nthreads);
+	#pragma omp parallel
+	{
+	#pragma omp single
+	{ derivs(y,dydt); } //first step calc
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
@@ -129,7 +134,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
-	derivs(f1,df1); //second step calc
+	#pragma omp single
+	{ derivs(f1,df1); } //second step calc
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
@@ -137,7 +144,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
-	derivs(f2,df2); //third step calc
+	#pragma omp single
+	{ derivs(f2,df2); } //third step calc
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
@@ -145,7 +154,9 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
-	derivs(f3,df3); //fourth step calc
+	#pragma omp single
+	{ derivs(f3,df3); }//fourth step calc
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
@@ -153,13 +164,16 @@ void dy(long double y[N][I][D], long double dydt[N][I][D], long double deltay[N]
 			}
 		}
 	}
-	derivs(f4,df4); //final calc
+	#pragma omp single
+	{ derivs(f4,df4); }//final calc
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
 				deltay[n][i][d] = (1./6.) * (df1[n][i][d] + 2 * df2[n][i][d] + 2 * df3[n][i][d] + df4[n][i][d]) * dt; //weighted avrage
 			}
 		}
+	}
 	}
 }
 void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function where the physics lives 
@@ -168,6 +182,10 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 	long double mag[N][N]; //magnitude of r
 	long double rhat[N][N][D];//unit vectors of r
 	long double fmag[N][N]; //magnitude of gravitational force between two given bodies	
+	omp_set_num_threads(nthreads);
+	#pragma omp parallel
+	{
+	#pragma omp for collapse(3)
 	FORN{
 		FORI{
 			FORD{
@@ -175,16 +193,21 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	#pragma omp nowait
+	#pragma omp for collapse(2)
 	FORN{
 		FORP{
 			sqmag[n][p] = 0; //clears sqmag variable
 		}
 	}
+	#pragma omp for collapse(2)
 	FORN{
 		FORD{
 			dydt[n][0][d] = y[n][1][d]; //change in position from velocity
 		}
 	}
+	#pragma omp nowait
+	#pragma omp for collapse(3)
 	FORN{
 		FORP{
 			FORD{
@@ -192,6 +215,7 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	#pragma omp for collapse(3)
 	FORN{
 		FORP{
 			FORD{
@@ -199,11 +223,13 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	#pragma omp for collapse(2)
 	FORN{
 		FORP{
 			mag[n][p] = sqrt(sqmag[n][p]); //calculates the magnitude of the r vector
 		}
 	}
+	#pragma omp for collapse(3)
 	FORN{
 		FORP{
 			FORD{
@@ -213,20 +239,24 @@ void derivs(long double y[N][I][D],long double dydt[N][I][D]){ //the function wh
 			}
 		}
 	}
+	#pragma omp nowait
+	#pragma omp for collapse(2)
 	FORN{
 		FORP{
 			if(p!=n){
-				fmag[n][p] = (-G*M*M)/POW(mag[n][p]); //acceleration
+				fmag[n][p] = (G*M*M)/mag[n][p]; //acceleration
 			}
 		}
 	}
+	#pragma omp for collapse(3)
 	FORN{
 		FORD{
 			FORP{
 				if(p!=n){
-					dydt[n][1][d] = (fmag[n][p]/M)*rhat[n][p][d]; //change velocity from force data
+					dydt[n][1][d] = (fmag[n][p]/M)*(rhat[n][p][d]*0.5); //change velocity from force data
 				}	
 			}
 		}
+	}
 	}
 }

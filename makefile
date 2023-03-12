@@ -1,4 +1,3 @@
 compile:
+	g++ -fopenmp simulator.cpp -o sim
 	rm *.dat
-	g++ simulator.cpp -o sim
-	g++ -fopenmp parallel.cpp -o par

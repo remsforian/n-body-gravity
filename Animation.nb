@@ -10,20 +10,22 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      4799,        120]
-NotebookOptionsPosition[      4310,        104]
-NotebookOutlinePosition[      4754,        121]
-CellTagsIndexPosition[      4711,        118]
+NotebookDataLength[      5770,        144]
+NotebookOptionsPosition[      5155,        125]
+NotebookOutlinePosition[      5595,        142]
+CellTagsIndexPosition[      5552,        139]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
+
+Cell[CellGroupData[{
 Cell[BoxData[{
  RowBox[{
   RowBox[{"data", " ", "=", " ", 
    RowBox[{
    "Import", "[", 
-    "\"\</home/solmasters/Documents/Code/three_body/body_cords_par.dat\>\"", 
+    "\"\</home/solmasters/Documents/Code/three_body/body_cords.dat\>\"", 
     "]"}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"bsize", "=", "250"}], ";"}], "\[IndentingNewLine]", 
@@ -92,18 +94,37 @@ Cell[BoxData[{
    3.886977598705909*^9}, {3.886977673944305*^9, 3.886977707222268*^9}, {
    3.887044299800408*^9, 3.887044301109857*^9}, {3.887218830492703*^9, 
    3.8872188317715397`*^9}, {3.887223696322547*^9, 3.8872236967724667`*^9}, {
-   3.8872237656565943`*^9, 3.88722376573136*^9}},
- CellLabel->"In[11]:=",ExpressionUUID->"28e494fd-ca23-434f-8578-b65a6bc37844"],
+   3.8872237656565943`*^9, 3.88722376573136*^9}, {3.887234604416739*^9, 
+   3.887234604474218*^9}, {3.887277445255118*^9, 3.887277467130869*^9}, {
+   3.887277851224699*^9, 3.887277851880073*^9}, {3.887286511979999*^9, 
+   3.887286513541812*^9}, {3.8872866529317102`*^9, 3.8872866777238827`*^9}, 
+   3.8872867666921253`*^9, {3.887287175681086*^9, 3.887287176270958*^9}, {
+   3.887554259615986*^9, 
+   3.887554260179132*^9}},ExpressionUUID->"28e494fd-ca23-434f-8578-\
+b65a6bc37844"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Import", "nffil", 
+   "\"File \\!\\(\\*RowBox[{\\\"\\\\\\\"/home/solmasters/Documents/Code/three_\
+body/body_cords_par.dat\\\\\\\"\\\"}]\\) not found during \\!\\(\\*RowBox[{\\\
+\"Import\\\"}]\\).\"", 2, 1, 1, 22600460477451982361, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.887554255415029*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"47a93ba1-4020-4c90-a35c-3827b404ff26"]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"ListAnimate", "[", "animgen", "]"}]], "Input",
  CellChangeTimes->{{3.886646311918285*^9, 3.886646319000725*^9}, {
   3.886764185491699*^9, 3.88676418578933*^9}, {3.886877595342784*^9, 
   3.8868775963780813`*^9}},
- CellLabel->"In[15]:=",ExpressionUUID->"d318c808-fab0-4f1b-8abf-85da1375b433"]
+ CellLabel->"In[85]:=",ExpressionUUID->"d318c808-fab0-4f1b-8abf-85da1375b433"]
 },
 WindowSize->{733.5, 867.75},
-WindowMargins->{{Automatic, 326.25}, {42.75, Automatic}},
+WindowMargins->{{Automatic, 326.25}, {0, Automatic}},
 TaggingRules-><|"TryRealOnly" -> False|>,
 FrontEndVersion->"13.1 for Linux x86 (64-bit) (June 16, 2022)",
 StyleDefinitions->"Default.nb",
@@ -120,8 +141,11 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 3431, 75, 157, "Input",ExpressionUUID->"28e494fd-ca23-434f-8578-b65a6bc37844"],
-Cell[3992, 97, 314, 5, 29, "Input",ExpressionUUID->"d318c808-fab0-4f1b-8abf-85da1375b433"]
+Cell[CellGroupData[{
+Cell[580, 22, 3779, 81, 157, "Input",ExpressionUUID->"28e494fd-ca23-434f-8578-b65a6bc37844"],
+Cell[4362, 105, 460, 10, 28, "Message",ExpressionUUID->"47a93ba1-4020-4c90-a35c-3827b404ff26"]
+}, Open  ]],
+Cell[4837, 118, 314, 5, 29, "Input",ExpressionUUID->"d318c808-fab0-4f1b-8abf-85da1375b433"]
 }
 ]
 *)
